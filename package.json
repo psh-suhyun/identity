@@ -1,0 +1,12 @@
+{
+  "name": "identity",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Spring Boot 회원 및 인증 서버",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "start": "./scripts/mvnw -B spring-boot:run",
+    "build": "./scripts/mvnw -B clean verify",
+    "test": "./scripts/mvnw -B test"
+  }
+}
