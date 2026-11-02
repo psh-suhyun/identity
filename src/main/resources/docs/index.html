@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Identity API</title>
+<style>
+body{margin:0;background:#f5f6f7;color:#20242b;font:15px/1.6 system-ui,sans-serif}main{max-width:1040px;margin:40px auto;padding:0 24px}header{display:flex;align-items:baseline;gap:24px;border-bottom:1px solid #d7dbe0}h1{font-size:28px}a{color:#245baf}article{background:white;border:1px solid #d7dbe0;margin:16px 0;padding:20px;border-radius:6px}h2{margin:0;font-size:18px}code,textarea,pre{font-family:ui-monospace,monospace}textarea{display:block;width:100%;box-sizing:border-box;min-height:100px;padding:12px;margin:12px 0;border:1px solid #abb5c1;border-radius:4px}button{padding:8px 18px;background:#245baf;color:white;border:0;border-radius:4px;cursor:pointer}button:disabled{opacity:.6}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f6f7;padding:12px}label{display:block;margin-top:12px}input{padding:8px;border:1px solid #abb5c1}small{color:#576476}
+</style></head><body><main><header><h1>Identity API</h1><a href="/v1/docs/openapi">OpenAPI JSON</a></header>
+<p>super·admin 전용 문서입니다. 현재 브라우저의 쿠키로 요청합니다. 실행 버튼은 실제 데이터를 변경할 수 있습니다.</p><p id="message" role="status">문서를 불러오는 중입니다.</p><section id="endpoints"></section></main>
+<script>
+'use strict';
+(async()=>{
+const response=await fetch('/v1/docs/openapi',{credentials:'same-origin'});
+if(!response.ok){document.querySelector('#message').textContent='문서를 볼 권한이 없거나 로그인이 만료되었습니다.';return;}
+const spec=await response.json();document.querySelector('#message').textContent='CSRF 헤더가 필요하지 않습니다. 세션 응답에는 원본 토큰을 노출하지 않습니다.';
+for(const [path,methods] of Object.entries(spec.paths))for(const [method,op] of Object.entries(methods)){
+ const card=document.createElement('article');const title=document.createElement('h2');title.textContent=method.toUpperCase()+' '+path;card.append(title);
+ const description=document.createElement('p');description.textContent=op.summary;card.append(description);
+ const params={};for(const param of op.parameters||[]){const label=document.createElement('label');label.textContent=param.name;const input=document.createElement('input');input.autocomplete='off';label.append(input);card.append(label);params[param.name]=input;}
+ let body;if(op.requestBody){const label=document.createElement('label');label.textContent='JSON body';body=document.createElement('textarea');body.spellcheck=false;body.autocomplete='off';body.value=JSON.stringify(op.requestBody.content['application/json'].example||{},null,2);label.append(body);card.append(label);}
+ const button=document.createElement('button');button.textContent='요청 실행';card.append(button);const result=document.createElement('pre');result.textContent='응답 대기';card.append(result);
+ button.onclick=async()=>{let target=path;for(const [key,input] of Object.entries(params)){if(!input.value){result.textContent=key+'를 입력하세요.';return;}target=target.replace('{'+key+'}',encodeURIComponent(input.value));}button.disabled=true;
+ try{if(body)JSON.parse(body.value);const res=await fetch(target,{method:method.toUpperCase(),credentials:'same-origin',headers:body?{'Content-Type':'application/json'}:{},body:body?body.value:undefined});const text=await res.text();try{result.textContent=res.status+'\n'+JSON.stringify(JSON.parse(text),null,2);}catch{result.textContent=res.status+'\n'+text;}}catch(error){result.textContent=error.message;}finally{button.disabled=false;}};
+ document.querySelector('#endpoints').append(card);
+}
+})().catch(()=>{document.querySelector('#message').textContent='문서를 불러오지 못했습니다.';});
+</script></body></html>
